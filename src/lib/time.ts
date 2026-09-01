@@ -21,14 +21,20 @@ export function schoolStatus(now = new Date()) {
   const current = periods.find(
     (p) => mins >= toMinutes(p.start) && mins < toMinutes(p.end),
   );
-  if (current)
+  if (current) {
+    // Lesson numbers restart with each shift. The configured periods use
+    // global slots (7–12 for the second shift), but the kiosk should present
+    // the student-facing ordinal for the active shift (1–6).
+    const shiftPeriodNumber =
+      periods.filter((p) => p.shift === current.shift).findIndex((p) => p.number === current.number) + 1;
     return {
       tone: "green" as const,
-      eyebrow: `Во тек е ${current.number}-ти час`,
+      eyebrow: `Во тек е ${shiftPeriodNumber}-ти час`,
       value: `${toMinutes(current.end) - mins} минути`,
       label: "Завршува за",
       period: current,
     };
+  }
   const next = periods.find((p) => mins < toMinutes(p.start));
   if (!next)
     return {
